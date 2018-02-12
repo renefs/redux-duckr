@@ -11,8 +11,7 @@ function FacebookAuthButton ({ onAuth, isFetching }) {
     <button onClick={onAuth} className={button} >
       {isFetching === true
         ? 'Loading'
-        : 'Login with Facebook'
-      }
+        : 'Login with Facebook'}
     </button>
   )
 }
