@@ -5,7 +5,7 @@ const MainContainer = React.createClass({
     return (
       <p>Hello World!</p>
     )
-  }
+  },
 })
 
 export default MainContainer
