@@ -1,10 +1,12 @@
-import auth, { logout } from 'helpers/auth'
+import auth, { logout, saveUser } from 'helpers/auth'
+import { formatUserInfo } from 'helpers/utils'
 
 const AUTH_USER = 'AUTH_USER'
 const UNAUTH_USER = 'UNAUTH_USER'
 const FETCHING_USER = 'FETCHING_USER'
 const FETCHING_USER_FAILURE = 'FETCHING_USER_FAILURE'
 const FETCHING_USER_SUCCESS = 'FETCHING_USER_SUCCESS'
+const REMOVE_FETCHING_USER = 'REMOVE_FETCHING_USER'
 
 export function authUser (uid) {
   return {
@@ -33,7 +35,7 @@ function fetchingUserFailure (error) {
   }
 }
 
-function fetchingUserSuccess (uid, user, timestamp) {
+export function fetchingUserSuccess (uid, user, timestamp) {
   return {
     type: FETCHING_USER_SUCCESS,
     uid,
@@ -45,12 +47,27 @@ function fetchingUserSuccess (uid, user, timestamp) {
 export function fetchAndHandleAuthedUser () {
   return function (dispatch) {
     dispatch(fetchingUser())
-    dispatch(fetchingUser())
-    return auth().then((user) => {
-      dispatch(fetchingUserSuccess(user.uid, user, Date.now()))
-      dispatch(authUser(user.uid))
+    return auth().then(({user, credential}) => {
+      const userData = user.providerData[0]
+      const userInfo = formatUserInfo(userData.displayName, userData.photoURL, user.uid)
+      return dispatch(fetchingUserSuccess(user.uid, userInfo, Date.now()))
     })
-      .catch((error) => this.props.fetchingUserFailure(error))
+    .then(({user}) => saveUser(user))
+    .then((user) => dispatch(authUser(user.uid)))
+    .catch((error) => dispatch(fetchingUserFailure(error)))
+  }
+}
+
+export function logoutAndUnauth () {
+  return function (dispatch) {
+    logout()
+    dispatch(unauthUser())
+  }
+}
+
+export function removeFetchingUser () {
+  return {
+    type: REMOVE_FETCHING_USER
   }
 }
 
@@ -65,26 +82,19 @@ const initialUserState = {
 
 function user (state = initialUserState, action) {
   switch (action.type) {
-    case FETCHING_USER_SUCCESS:
+    case FETCHING_USER_SUCCESS :
       return {
         ...state,
         info: action.user,
         lastUpdated: action.timestamp,
       }
-    default:
+    default :
       return state
   }
 }
 
-export function logoutAndUnauth () {
-  return function (dispatch) {
-    logout()
-    dispatch(unauthUser())
-  }
-}
-
 const initialState = {
-  isFetching: false,
+  isFetching: true,
   error: '',
   isAuthed: false,
   authedId: '',
@@ -92,13 +102,13 @@ const initialState = {
 
 export default function users (state = initialState, action) {
   switch (action.type) {
-    case AUTH_USER:
+    case AUTH_USER :
       return {
         ...state,
         isAuthed: true,
         authedId: action.uid,
       }
-    case UNAUTH_USER:
+    case UNAUTH_USER :
       return {
         ...state,
         isAuthed: false,
@@ -115,6 +125,11 @@ export default function users (state = initialState, action) {
         isFetching: false,
         error: action.error,
       }
+    case REMOVE_FETCHING_USER :
+      return {
+        ...state,
+        isFetching: false,
+      }
     case FETCHING_USER_SUCCESS:
       return action.user === null
         ? {
@@ -128,7 +143,7 @@ export default function users (state = initialState, action) {
           error: '',
           [action.uid]: user(state[action.uid], action),
         }
-    default:
+    default :
       return state
   }
 }

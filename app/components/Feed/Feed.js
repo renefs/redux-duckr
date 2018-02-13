@@ -1,13 +1,7 @@
 import React, { PropTypes } from 'react'
 
-Feed.propTypes = {
-
-}
-
-function Feed ({ onAuth, isFetching }) {
+export default function Feed (props) {
   return (
-    <div>Feeeed</div>
+    <div>Feed</div>
   )
 }
-
-export default Feed

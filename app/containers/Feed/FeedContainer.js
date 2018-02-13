@@ -1,21 +1,12 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
 import { Feed } from 'components'
-import { connect } from 'react-redux'
 
 const FeedContainer = React.createClass({
-  propTypes: {
-    isAuthed: PropTypes.bool.isRequired,
-  },
-
   render () {
     return (
-      <div>
-        <Feed />
-      </div>
+      <Feed />
     )
   },
 })
 
-export default connect(
-  (state) => ({ isAuthed: state.isAuthed })
-)(FeedContainer)
+export default FeedContainer
