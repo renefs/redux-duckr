@@ -1,0 +1,15 @@
+{
+  "include": [
+    "app/**/*"
+  ],
+  "compilerOptions": {
+    "target": "ES6",
+    "jsx": "react",
+    "module": "commonjs",
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}
